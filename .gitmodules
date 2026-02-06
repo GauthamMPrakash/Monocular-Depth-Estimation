@@ -1,0 +1,3 @@
+[submodule "MonoNav"]
+	path = MonoNav
+	url = git@github.com:GauthamMPrakash/MonoNav.git
