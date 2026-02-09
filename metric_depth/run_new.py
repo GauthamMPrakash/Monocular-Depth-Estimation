@@ -9,10 +9,10 @@ from depth_anything_v2.dpt import DepthAnythingV2
 # CONFIG
 # -----------------------------
 STREAM_URL = "http://10.64.219.56:81/stream"  # YOUR ESP32 HTTP MJPEG stream
-INPUT_SIZE = 320
+INPUT_SIZE = 256
 OUTDIR = "./esp32_depth"
-ENCODER = 'vits'  # must match your checkpoint
-CHECKPOINT = "checkpoints/depth_anything_v2_metric_hypersim_vits.pth"
+ENCODER = 'vitb'  # must match your checkpoint
+CHECKPOINT = "checkpoints/depth_anything_v2_metric_hypersim_vitb.pth"
 MAX_DEPTH = 20
 SAVE_NUMPY = False
 PRED_ONLY = False
@@ -34,7 +34,7 @@ model_configs = {
     'vitg': {'encoder': 'vitg', 'features': 384, 'out_channels': [1536, 1536, 1536, 1536]}
 }
 
-depth_anything = DepthAnythingV2(**{**model_configs[ENCODER]}, 'max_depth' = MAX_DEPTH)
+depth_anything = DepthAnythingV2(**{**model_configs[ENCODER], 'max_depth': MAX_DEPTH})
 depth_anything.load_state_dict(torch.load(CHECKPOINT, map_location='cpu'))
 depth_anything = depth_anything.to(DEVICE).eval()
 
@@ -43,6 +43,8 @@ depth_anything = depth_anything.to(DEVICE).eval()
 # -----------------------------
 cap = cv2.VideoCapture(STREAM_URL)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+if not cap.isOpened():
+    raise RuntimeError("Cannot open ESP32 HTTP stream")
 
 print("✅ ESP32 HTTP stream opened")
 
@@ -88,4 +90,3 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-
