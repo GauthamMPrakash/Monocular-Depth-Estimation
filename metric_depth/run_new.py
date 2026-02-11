@@ -8,7 +8,7 @@ from depth_anything_v2.dpt import DepthAnythingV2
 # -----------------------------
 # CONFIG
 # -----------------------------
-STREAM_URL = "http://10.208.153.56:81/stream"  # YOUR ESP32 HTTP MJPEG stream
+STREAM_URL = "http:10.208.153.56:81/stream"  # YOUR ESP32 HTTP MJPEG stream
 INPUT_SIZE = 256
 OUTDIR = "./esp32_depth"
 ENCODER = 'vitb'  # must match your checkpoint

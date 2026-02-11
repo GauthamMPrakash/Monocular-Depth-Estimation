@@ -10,6 +10,7 @@
 
 import logging
 
+import torch
 from torch import Tensor
 from torch import nn
 
@@ -63,9 +64,26 @@ class Attention(nn.Module):
 
 
 class MemEffAttention(Attention):
+    _fallback_warned = False
+
     def forward(self, x: Tensor, attn_bias=None) -> Tensor:
         if not XFORMERS_AVAILABLE:
             assert attn_bias is None, "xFormers is required for nested tensors usage"
+            return super().forward(x)
+
+        # xFormers flash/cutlass attention kernels require CUDA with fp16/bf16.
+        # Fall back to native attention for CPU/float32 to keep inference working.
+        if x.device.type != "cuda" or x.dtype not in (torch.float16, torch.bfloat16):
+            if attn_bias is not None:
+                raise AssertionError("attn_bias is only supported with xFormers attention kernels")
+            if not MemEffAttention._fallback_warned:
+                logger.warning(
+                    "Falling back to native attention (device=%s, dtype=%s). "
+                    "Use CUDA with float16/bfloat16 to enable xFormers memory-efficient attention.",
+                    x.device.type,
+                    x.dtype,
+                )
+                MemEffAttention._fallback_warned = True
             return super().forward(x)
 
         B, N, C = x.shape
@@ -73,7 +91,15 @@ class MemEffAttention(Attention):
 
         q, k, v = unbind(qkv, 2)
 
-        x = memory_efficient_attention(q, k, v, attn_bias=attn_bias)
+        try:
+            x = memory_efficient_attention(q, k, v, attn_bias=attn_bias)
+        except NotImplementedError:
+            if attn_bias is not None:
+                raise
+            if not MemEffAttention._fallback_warned:
+                logger.warning("xFormers attention kernel not available for this input; using native attention.")
+                MemEffAttention._fallback_warned = True
+            return super().forward(x)
         x = x.reshape([B, N, C])
 
         x = self.proj(x)
