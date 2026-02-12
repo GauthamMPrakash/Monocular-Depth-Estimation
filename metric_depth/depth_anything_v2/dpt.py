@@ -194,7 +194,7 @@ class DepthAnythingV2(nn.Module):
         
         return depth.cpu().numpy()
     
-    def image2tensor(self, raw_image, input_size=512):        
+    def image2tensor(self, raw_image, input_size=518):        
         transform = Compose([
             Resize(
                 width=input_size,
