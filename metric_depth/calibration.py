@@ -5,7 +5,7 @@ import numpy as np
 # ================= CONFIG =================
 CHECKERBOARD = (7, 9)          # inner corners (cols, rows)
 SQUARE_SIZE = 25.0             # mm
-ESP32_STREAM_URL = "http://10.54.102.56:81/stream"  # <-- CHANGE IP
+ESP32_STREAM_URL = "http://10.178.48.56:81/stream"  # <-- CHANGE IP
 # =========================================
 
 criteria = (
