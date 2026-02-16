@@ -8,8 +8,8 @@ from depth_anything_v2.dpt import DepthAnythingV2
 # -----------------------------
 # CONFIG
 # -----------------------------
-STREAM_URL = "http://172.16.9.254:81/stream"  # YOUR ESP32 HTTP MJPEG stream
-INPUT_SIZE = 252
+STREAM_URL = "http://10.42.0.29:81/stream"  # YOUR ESP32 HTTP MJPEG stream
+INPUT_SIZE = 238
 OUTDIR = "./esp32_depth"
 ENCODER = 'vitb'  # must match your checkpoint
 CHECKPOINT = "checkpoints/depth_anything_v2_metric_hypersim_vitb.pth"
@@ -31,7 +31,7 @@ model_configs = {
     'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
     'vitb': {'encoder': 'vitb', 'features': 128, 'out_channels': [96, 192, 384, 768]},
     'vitl': {'encoder': 'vitl', 'features': 256, 'out_channels': [256, 512, 1024, 1024]},
-    'vitg': {'encoder': 'vitg', 'features': 384, 'out_channels': [1536, 1536, 1536, 1536]}
+    # 'vitg': {'encoder': 'vitg', 'features': 384, 'out_channels': [1536, 1536, 1536, 1536]}
 }
 
 depth_anything = DepthAnythingV2(**{**model_configs[ENCODER], 'max_depth': MAX_DEPTH})
