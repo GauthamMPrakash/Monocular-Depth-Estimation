@@ -9,11 +9,11 @@ from depth_anything_v2.dpt import DepthAnythingV2
 # CONFIG
 # -----------------------------
 STREAM_URL = "http://10.42.0.29:81/stream"  # YOUR ESP32 HTTP MJPEG stream
-INPUT_SIZE = 238
+INPUT_SIZE = 308
 OUTDIR = "./esp32_depth"
 ENCODER = 'vitb'  # must match your checkpoint
 CHECKPOINT = "checkpoints/depth_anything_v2_metric_hypersim_vitb.pth"
-MAX_DEPTH = 5
+MAX_DEPTH = 20
 SAVE_NUMPY = False
 PRED_ONLY = False
 GRAYSCALE = False
@@ -34,9 +34,11 @@ model_configs = {
     # 'vitg': {'encoder': 'vitg', 'features': 384, 'out_channels': [1536, 1536, 1536, 1536]}
 }
 
+# Initialize the DepthAnythingV2 model and load the checkpoint
 depth_anything = DepthAnythingV2(**{**model_configs[ENCODER], 'max_depth': MAX_DEPTH})
-depth_anything.load_state_dict(torch.load(CHECKPOINT, map_location='cpu'))
+depth_anything.load_state_dict(torch.load(CHECKPOINT, map_location=DEVICE))
 depth_anything = depth_anything.to(DEVICE).eval()
+model_device = next(depth_anything.parameters()).device
 
 # -----------------------------
 # OPEN HTTP STREAM
@@ -54,6 +56,11 @@ while True:
     if not ret:
         print("⚠️ Frame not received, retrying...")
         continue
+
+    # Show RGB stream immediately, before depth estimation.
+    cv2.imshow("ESP32 RGB Stream", frame)
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
 
     # -----------------------------
     # RUN DEPTH ESTIMATION
@@ -81,7 +88,7 @@ while True:
     else:
         combined_result = depth_vis
 
-    # display
+    # display depth (or RGB + depth)
     cv2.imshow("ESP32 Metric Depth", combined_result)
     frame_count += 1
 
