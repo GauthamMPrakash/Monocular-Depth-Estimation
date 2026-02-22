@@ -1,7 +1,7 @@
 gradio_imageslider
 gradio==4.29.0
 matplotlib
-opencv python
+opencv-python
 torch
 torchvision
 pytorch
