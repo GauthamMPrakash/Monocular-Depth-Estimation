@@ -9,10 +9,10 @@ from depth_anything_v2.dpt import DepthAnythingV2
 # CONFIG
 # -----------------------------
 STREAM_URL = "http://10.42.0.29:81/stream"  # YOUR ESP32 HTTP MJPEG stream
-INPUT_SIZE = 308
+INPUT_SIZE = 336
 OUTDIR = "./esp32_depth"
 ENCODER = 'vitb'  # must match your checkpoint
-CHECKPOINT = "checkpoints/depth_anything_v2_metric_hypersim_vitb.pth"
+CHECKPOINT = "../checkpoints/depth_anything_v2_metric_hypersim_vitb.pth"
 MAX_DEPTH = 20
 SAVE_NUMPY = False
 PRED_ONLY = False
@@ -66,14 +66,14 @@ while True:
     # RUN DEPTH ESTIMATION
     # -----------------------------
     depth = depth_anything.infer_image(frame, INPUT_SIZE)
-
+    depth_vis = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
+    depth_vis = depth_vis.astype(np.uint8)
     if SAVE_NUMPY:
         output_path = os.path.join(OUTDIR, f'frame_{frame_count:05d}_raw_depth_meter.npy')
         np.save(output_path, depth)
 
     # normalize for visualization
-    depth_vis = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-    depth_vis = depth_vis.astype(np.uint8)
+    
     print(depth.min())
 
     if GRAYSCALE:
