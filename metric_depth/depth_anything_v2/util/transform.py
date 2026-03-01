@@ -132,7 +132,6 @@ class NormalizeImage(object):
 
     def __call__(self, sample):
         sample["image"] = (sample["image"] - self.__mean) / self.__std
-
         return sample
 
 
